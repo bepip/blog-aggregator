@@ -12,6 +12,8 @@ function initCommandRegistry(): CommandsRegistry {
 	registerCommand(cmdRegistry, 'agg', handlerAggregator);
 	registerCommand(cmdRegistry, 'addfeed', handlerAddFeed);
 	registerCommand(cmdRegistry, 'feeds', handlerFeeds);
+	registerCommand(cmdRegistry, 'follow', handlerFollow);
+	registerCommand(cmdRegistry, 'following', handlerFollowing);
 	return cmdRegistry;
 }
 

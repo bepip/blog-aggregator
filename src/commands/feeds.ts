@@ -4,7 +4,7 @@ import { getUser, getUserById, User } from "src/lib/db/queries/users";
 
 export async function handlerAddFeed(cmdName: string, ...args: string[]) {
 	if (!args || args.length !== 2) {
-		throw new Error(`usage: ${cmdName} <name>`);
+		throw new Error(`usage: ${cmdName} <feedName> <url>`);
 	}
 	const username = readConfig().currentUserName;
 	const user = await getUser(username);
@@ -25,6 +25,20 @@ export async function handlerFeeds() {
 		console.log(`${feed.url}`);
 		console.log(`${user.name}`);
 		console.log();
+	}
+
+}
+
+export async function handlerFollow(cmdName: string, ...args: string[]) {
+	if (!args || args.length !== 1) {
+		throw new Error(`usage: ${cmdName} <url>`);
+	}
+
+}
+
+export async function handlerFollowing(cmdName: string, ...args: string[]) {
+	if (!args || args.length !== 1) {
+		throw new Error(`usage: ${cmdName} <url>`);
 	}
 
 }

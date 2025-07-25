@@ -45,7 +45,7 @@ export async function handlerUsers(cmdName: string, ...args: string[]) {
 	try {
 		const users = await getUsers();
 		const currentUser = readConfig().currentUserName;
-		users.map((user) => console.log(`* ${user.name}`));
+		users.map((user) => console.log(`* ${user.name === currentUser ? `${user.name} (current)` : user.name}`));
 	} catch (err) {
 		throw new Error(`Failed to fetch users`);
 	}

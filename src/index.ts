@@ -1,3 +1,4 @@
+import { handlerAggregator } from "./commands/aggregator";
 import { CommandsRegistry, registerCommand, runCommand } from "./commands/commands";
 import { handlerLogin, handlerRegister, handlerReset, handlerUsers } from "./commands/users";
 
@@ -7,6 +8,7 @@ function initCommandRegistry(): CommandsRegistry {
 	registerCommand(cmdRegistry, 'register', handlerRegister);
 	registerCommand(cmdRegistry, 'reset', handlerReset);
 	registerCommand(cmdRegistry, 'users', handlerUsers);
+	registerCommand(cmdRegistry, 'agg', handlerAggregator);
 	return cmdRegistry;
 }
 

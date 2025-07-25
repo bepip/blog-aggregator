@@ -8,6 +8,13 @@
       "when": 1753432447991,
       "tag": "0000_handy_pet_avengers",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1753450118111,
+      "tag": "0001_perfect_red_wolf",
+      "breakpoints": true
     }
   ]
 }

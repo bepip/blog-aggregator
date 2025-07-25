@@ -1,13 +1,16 @@
 import { CommandsRegistry, registerCommand, runCommand } from "./commands/commands";
-import { handlerLogin } from "./commands/users";
+import { handlerLogin, handlerRegister, handlerReset, handlerUsers } from "./commands/users";
 
 function initCommandRegistry(): CommandsRegistry {
 	const cmdRegistry: CommandsRegistry = {};
 	registerCommand(cmdRegistry, 'login', handlerLogin);
+	registerCommand(cmdRegistry, 'register', handlerRegister);
+	registerCommand(cmdRegistry, 'reset', handlerReset);
+	registerCommand(cmdRegistry, 'users', handlerUsers);
 	return cmdRegistry;
 }
 
-function main() {
+async function main() {
 	const cmdRegistry = initCommandRegistry();
 	const argv = process.argv.slice(2);
 	if (argv.length === 0) {
@@ -16,11 +19,12 @@ function main() {
 	}
 	const [cmdName, ...args] = argv;
 	try {
-		runCommand(cmdRegistry, cmdName, ...args);
+		await runCommand(cmdRegistry, cmdName, ...args);
 	} catch (err) {
 		console.log(`Error: ${(err as Error).message}`);
 		process.exit(1);
 	}
+	process.exit(0);
 }
 
-main();
+await main();

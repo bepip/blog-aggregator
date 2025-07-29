@@ -1,19 +1,21 @@
 import { handlerAggregator } from "./commands/aggregator";
 import { CommandsRegistry, registerCommand, runCommand } from "./commands/commands";
-import { handlerAddFeed, handlerFeeds } from "./commands/feeds";
+import { handlerAddFeed, handlerFeeds, handlerFollow, handlerFollowing, handlerUnfollow } from "./commands/feeds";
 import { handlerLogin, handlerRegister, handlerReset, handlerUsers } from "./commands/users";
+import { middlewareLoggedIn } from "./lib/middlewareLogin";
 
 function initCommandRegistry(): CommandsRegistry {
 	const cmdRegistry: CommandsRegistry = {};
-	registerCommand(cmdRegistry, 'login', handlerLogin);
+	registerCommand(cmdRegistry, 'login',handlerLogin);
 	registerCommand(cmdRegistry, 'register', handlerRegister);
 	registerCommand(cmdRegistry, 'reset', handlerReset);
 	registerCommand(cmdRegistry, 'users', handlerUsers);
 	registerCommand(cmdRegistry, 'agg', handlerAggregator);
-	registerCommand(cmdRegistry, 'addfeed', handlerAddFeed);
+	registerCommand(cmdRegistry, 'addfeed', middlewareLoggedIn(handlerAddFeed));
 	registerCommand(cmdRegistry, 'feeds', handlerFeeds);
-	registerCommand(cmdRegistry, 'follow', handlerFollow);
-	registerCommand(cmdRegistry, 'following', handlerFollowing);
+	registerCommand(cmdRegistry, 'follow',middlewareLoggedIn( handlerFollow));
+	registerCommand(cmdRegistry, 'following', middlewareLoggedIn(handlerFollowing));
+	registerCommand(cmdRegistry, 'unfollow', middlewareLoggedIn(handlerUnfollow));
 	return cmdRegistry;
 }
 

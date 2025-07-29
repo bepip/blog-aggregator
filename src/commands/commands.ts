@@ -1,3 +1,5 @@
+import { User } from "src/lib/db/queries/users";
+
 export type CommandHandler = (cmdName: string, ...args: string[]) => Promise<void>;
 export type CommandsRegistry = Record<string, CommandHandler>;
 
@@ -12,3 +14,9 @@ export async function runCommand(registry: CommandsRegistry, cmdName: string, ..
 		throw new Error(`Unknown command: ${cmdName}`);
 	}
 }
+
+export type UserCommandHandler = (
+	cmdName: string,
+	user: User,
+	...args: string[]
+) => Promise<void> | void;

@@ -19,6 +19,10 @@ export function readConfig(): Config {
 	return validateConfig(JSON.parse(raw));
 };
 
+export function getUser(): string {
+	return readConfig().currentUserName;
+}
+
 function getConfigFilePath(): string {
 	return path.join(os.homedir() + '/.gatorconfig.json');
 };

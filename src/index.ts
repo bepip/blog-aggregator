@@ -1,4 +1,5 @@
 import { handlerAggregate } from "./commands/aggregate";
+import { handlerBrowse } from "./commands/browse";
 import { CommandsRegistry, registerCommand, runCommand } from "./commands/commands";
 import { handlerFollow, handlerListFeedFollows, handlerUnfollow } from "./commands/feed-follows";
 import { handlerAddFeed, handlerListFeeds } from "./commands/feeds";
@@ -18,6 +19,7 @@ function initCommandRegistry(): CommandsRegistry {
 	registerCommand(cmdRegistry, 'follow', middlewareLoggedIn(handlerFollow));
 	registerCommand(cmdRegistry, 'following', middlewareLoggedIn(handlerListFeedFollows));
 	registerCommand(cmdRegistry, 'unfollow', middlewareLoggedIn(handlerUnfollow));
+	registerCommand(cmdRegistry, 'browse', middlewareLoggedIn(handlerBrowse));
 	return cmdRegistry;
 }
 

@@ -1,52 +1,40 @@
-import { readConfig, setUser } from "src/config.js";
-import { createUser, getUser, getUsers, resetUsers } from "src/lib/db/queries/users";
+import { readConfig, setUser } from "src/config";
+import { createUser, getUserByName, getUsers } from "src/lib/db/queries/users";
 
 export async function handlerLogin(cmdName: string, ...args: string[]) {
-	if (!args || args.length !== 1) {
+	if (args.length !== 1) {
 		throw new Error(`usage: ${cmdName} <name>`);
 	}
-	const user = await getUser(args[0]);
-	if (!user) {
-		throw new Error(`User ${args[0]} not found`);
+
+	const userName = args[0];
+	const existingUser = await getUserByName(userName);
+	if (!existingUser) {
+		throw new Error(`User ${userName} not found`);
 	}
-	setUser(user.name);
-	console.log(`User ${args[0]} has logged in`);
+
+	setUser(existingUser.name);
+	console.log("User switched successfully!");
 }
 
 export async function handlerRegister(cmdName: string, ...args: string[]) {
-	if (!args || args.length !== 1) {
+	if (args.length != 1) {
 		throw new Error(`usage: ${cmdName} <name>`);
 	}
-	try {
-		const createdUser = await createUser(args[0]);
-		setUser(createdUser.name);
-		console.log(`User ${createdUser.name} has been created.`);
-	} catch (err) {
-		throw new Error(`User ${args[0]} not found`);
-	}
-}
 
-export async function handlerReset(cmdName: string, ...args: string[]) {
-	if (!args || args.length !== 0) {
-		throw new Error(`usage: ${cmdName} <name>`);
+	const userName = args[0];
+	const user = await createUser(userName);
+	if (!user) {
+		throw new Error(`User ${userName} not found`);
 	}
-	try {
-		await resetUsers();
-		console.log('sucessfully reset users table');
-	} catch (err) {
-		throw new Error(`Failed to reset users table`);
-	}
+
+	setUser(user.name);
+	console.log("User created successfully!");
 }
 
 export async function handlerUsers(cmdName: string, ...args: string[]) {
-	if (!args || args.length !== 0) {
-		throw new Error(`usage: ${cmdName} <name>`);
-	}
-	try {
-		const users = await getUsers();
-		const currentUser = readConfig().currentUserName;
-		users.map((user) => console.log(`* ${user.name === currentUser ? `${user.name} (current)` : user.name}`));
-	} catch (err) {
-		throw new Error(`Failed to fetch users`);
-	}
+	const users = await getUsers();
+	const currentUser = readConfig().currentUserName;
+	users.forEach( (user) => {
+		console.log(`\t* ${user.name}`, user.name === currentUser ? "(current)": "");
+	});
 }

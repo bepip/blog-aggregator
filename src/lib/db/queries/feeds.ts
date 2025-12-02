@@ -1,43 +1,47 @@
-import { eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db } from "..";
-import { feeds } from "../schema";
+import { feedFollows, feeds } from "../schema";
+import { firstOrUndefined } from "./utils";
 
-export type Feed = typeof feeds.$inferSelect;
-
-export async function createFeed(userId: string, feedName: string, url: string) {
-	const result = await db.insert(feeds).values({
+export async function createFeed(
+	feedName: string,
+	url: string,
+	userId: string
+) {
+	const res = await db.insert(feeds).values({
 		name: feedName,
-		url: url,
-		user_id: userId
+		url,
+		userId
 	}).returning();
-	if (result.length === 0) return;
-	return result[0];
-}
 
-export async function getFeedsFromUserId(userId: string) {
-	const result = await db.select().from(feeds).where(eq(feeds.user_id, userId));
-	if (result.length === 0) return;
-	if (result.length === 1) return result[0];
-	return result;
-}
-
-export async function getFeedsFromName(name: string) {
-	const result = await db.select().from(feeds).where(eq(feeds.name, name));
-	if (result.length === 0) return;
-	if (result.length === 1) return result[0];
-	return result;
-}
-
-export async function getFeedsFromUrl(url: string) {
-	const result = await db.select().from(feeds).where(eq(feeds.url, url));
-	if (result.length === 0) return;
-	return result[0];
+	return firstOrUndefined(res);
 }
 
 export async function getFeeds() {
-	return await db.select().from(feeds);
+	return await db.select().from(feeds)
 }
 
-export async function resetFeeds() {
-	await db.delete(feeds);
+export async function getFeedByUrl(url: string) {
+	const result = await db.select().from(feeds).where(eq(feeds.url, url));
+	return firstOrUndefined(result);
+}
+
+export async function markFeedFetched(feedId: string) {
+	const result = await db
+		.update(feeds)
+		.set({
+			lastFetchAt: new Date(),
+		})
+		.where(eq(feeds.id, feedId))
+		.returning();
+	return firstOrUndefined(result);
+}
+
+export async function getNextFeedToFetch() {
+	const result = await db
+		.select()
+		.from(feeds)
+		.orderBy(sql`${feeds.lastFetchAt} desc nulls first`)
+		.limit(1);
+	return firstOrUndefined(result);
 }

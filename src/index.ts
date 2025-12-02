@@ -1,21 +1,25 @@
-import { handlerAggregator } from "./commands/aggregator";
+import { handlerAggregate } from "./commands/aggregate";
+import { handlerBrowse } from "./commands/browse";
 import { CommandsRegistry, registerCommand, runCommand } from "./commands/commands";
-import { handlerAddFeed, handlerFeeds, handlerFollow, handlerFollowing, handlerUnfollow } from "./commands/feeds";
-import { handlerLogin, handlerRegister, handlerReset, handlerUsers } from "./commands/users";
-import { middlewareLoggedIn } from "./lib/middlewareLogin";
+import { handlerFollow, handlerListFeedFollows, handlerUnfollow } from "./commands/feed-follows";
+import { handlerAddFeed, handlerListFeeds } from "./commands/feeds";
+import { handlerReset } from "./commands/reset";
+import { handlerLogin, handlerRegister, handlerUsers } from "./commands/users";
+import { middlewareLoggedIn } from "./middleware";
 
 function initCommandRegistry(): CommandsRegistry {
 	const cmdRegistry: CommandsRegistry = {};
-	registerCommand(cmdRegistry, 'login',handlerLogin);
+	registerCommand(cmdRegistry, 'login', handlerLogin);
 	registerCommand(cmdRegistry, 'register', handlerRegister);
 	registerCommand(cmdRegistry, 'reset', handlerReset);
 	registerCommand(cmdRegistry, 'users', handlerUsers);
-	registerCommand(cmdRegistry, 'agg', handlerAggregator);
+	registerCommand(cmdRegistry, 'agg', handlerAggregate);
 	registerCommand(cmdRegistry, 'addfeed', middlewareLoggedIn(handlerAddFeed));
-	registerCommand(cmdRegistry, 'feeds', handlerFeeds);
-	registerCommand(cmdRegistry, 'follow',middlewareLoggedIn( handlerFollow));
-	registerCommand(cmdRegistry, 'following', middlewareLoggedIn(handlerFollowing));
+	registerCommand(cmdRegistry, 'feeds', handlerListFeeds);
+	registerCommand(cmdRegistry, 'follow', middlewareLoggedIn(handlerFollow));
+	registerCommand(cmdRegistry, 'following', middlewareLoggedIn(handlerListFeedFollows));
 	registerCommand(cmdRegistry, 'unfollow', middlewareLoggedIn(handlerUnfollow));
+	registerCommand(cmdRegistry, 'browse', middlewareLoggedIn(handlerBrowse));
 	return cmdRegistry;
 }
 

@@ -4,63 +4,46 @@ import path from "path";
 
 export type Config = {
 	dbUrl: string,
-	currentUserName: string,
+	currentUserName: string
 };
 
-export function setUser(username: string) {
-	const cfg = readConfig();
-	cfg.currentUserName = username;
-	writeConifg(cfg);
-};
+export function setUser(userName: string) {
+	const config = readConfig();
+	config.currentUserName = userName;
+	writeConfig(config);
+}
 
 export function readConfig(): Config {
-	const configPath = getConfigFilePath();
-	const raw = fs.readFileSync(configPath, 'utf8');
-	return validateConfig(JSON.parse(raw));
-};
-
-export function getUser(): string {
-	return readConfig().currentUserName;
+	const filePath = getConfigFilePath();
+	const rawConfig = fs.readFileSync(filePath, "utf8");
+	return validateConfig(JSON.parse(rawConfig));
 }
 
 function getConfigFilePath(): string {
-	return path.join(os.homedir() + '/.gatorconfig.json');
-};
+	const configName = ".gatorconfig.json";
+	return path.join(os.homedir(), configName);
+}
 
-function writeConifg(cfg: Config): void {
-	const filePath = getConfigFilePath();
+function writeConfig(cfg: Config): void {
+	const fullPath = getConfigFilePath();
 	const rawConfig = {
-		"db_url": cfg.dbUrl,
-		"current_user_name": cfg.currentUserName,
+		db_url: cfg.dbUrl,
+		current_user_name: cfg.currentUserName
 	}
-	const data = JSON.stringify(rawConfig, null, 2);
-	fs.writeFileSync(filePath, data, { encoding: "utf-8" });
-};
+
+	const data = JSON.stringify(rawConfig);
+	fs.writeFileSync(fullPath, data, {encoding: "utf8"});
+}
 
 function validateConfig(rawConfig: any): Config {
-	if (typeof rawConfig !== "object" || rawConfig === null) {
-		throw new Error("Config not an object");
+	if (!rawConfig.db_url || typeof rawConfig.db_url !== "string") {
+		throw new Error("missing db url in config");
 	}
-
-	if (typeof rawConfig.db_url !== "string" || rawConfig.db_url.length === 0) {
-		throw new Error("Config missing or invalid 'db_url'");
+	if (rawConfig.current_user_name && typeof rawConfig.current_user_name !== "string") {
+		throw new Error("current username must be a string in config");
 	}
-
-	if ("current_user_name" in rawConfig && typeof rawConfig.current_user_name !== "string") {
-		throw new Error("Config 'current_user_name' must be a string if present");
-	}
-
-	const allowedKeys = new Set(["db_url", "current_user_name"]);
-	for (const key in rawConfig) {
-		if (!allowedKeys.has(key)) {
-			throw new Error(`Unexpected key in config: '${key}'`);
-		}
-	}
-
-	const config: Config = {
+	return {
 		dbUrl: rawConfig.db_url,
-		currentUserName: rawConfig.current_user_name,
-	};
-
-	return config;
+		currentUserName: rawConfig.current_user_name || ""
+	}
 }

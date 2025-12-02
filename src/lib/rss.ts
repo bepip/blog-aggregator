@@ -1,110 +1,83 @@
 import { XMLParser } from "fast-xml-parser";
+import { contains, isItem } from "./utils";
+
+export type RSSItem = {
+	title: string,
+	link: string,
+	description: string,
+	pubDate: string
+}
 
 export type RSSFeed = {
 	channel: {
-		title: string;
-		link: string;
-		description: string;
-		item: RSSItem[];
+		title: string,
+		link: string,
+		description: string,
+		item: RSSItem[],
 	};
-};
-
-export type RSSItem = {
-	title: string;
-	link: string;
-	description: string;
-	pubDate: string;
 };
 
 export async function fetchFeed(feedURL: string) {
-	try {
-		const response = await fetch(feedURL, {
-			method: 'GET',
-			headers: {
-				'User-Agent': 'gator',
-				accept: "application/rss+xml"
-			}
-		});
-		if (!response.ok) {
-			throw new Error(`${response.status} ${response.statusText}`);
-		}
-		const rawData = await response.text();
-		const parser = new XMLParser();
-		const feedObject = parser.parse(rawData);
-		if ('rss' in feedObject === false) {
-			throw new Error(`rss not in parsed object`);
-		}
-		const rssObject = feedObject.rss;
-		if ('channel' in rssObject === false) {
-			throw new Error(`channel not in parsed object`);
-		}
-		return validateRSSFeed(rssObject.channel);
-	} catch (err) {
-		throw new Error(`failed to fetch ${feedURL}, ${(err as Error).message}`);
+	const data = await fetchData(feedURL);
+	const parser = new XMLParser();
+	const obj = parser.parse(data);
+	if (!contains(obj.rss, "channel")) {
+		throw new Error("Channel field missing");
 	}
-}
+	const channel = obj.rss.channel;
+	const title = channel.title;
+	const link = channel.link;
+	const description = channel.description;
+	const items = channel.item;
 
-function validateRSSFeed(raw: any): RSSFeed {
-	if (typeof raw !== 'object' || raw === null) {
-		throw new Error(`data not an object`);
+	if (!title || typeof title !== "string") {
+		throw new Error("title missing in channel");
 	}
-	if (!raw.title || typeof raw.title !== 'string') {
-		throw new Error(`title is required in RSSFeed`);
+	if (!link || typeof link !== "string") {
+		throw new Error("link missing in channel");
 	}
-	if (!raw.link || typeof raw.link !== 'string') {
-		throw new Error(`link is required in RSSFeed`);
+	if (!description || typeof description !== "string") {
+		throw new Error("description missing in channel");
 	}
-	if (!raw.description || typeof raw.description !== 'string') {
-		throw new Error(`description is required in RSSFeed`);
-	}
-
-	if ((raw.item && !Array.isArray(raw.item))) {
-		return {
-			channel: {
-				title: raw.title,
-				link: raw.link,
-				description: raw.link,
-				item: []
-			}
-		};
-	}
-
-	const items: RSSItem[] = [];
-	for (const item of raw.item) {
-		const validatedItem = validateItem(item);
-		if (!validatedItem) {
-			continue;
-		}
-		items.push(validatedItem);
-	}
-	return {
+	const feed: RSSFeed = {
 		channel: {
-			title: raw.title,
-			link: raw.link,
-			description: raw.link,
-			item: items
+			title: title,
+			link: link,
+			description: description,
+			item: []
 		}
-	};
+	}
+
+	if (Array.isArray(items)) {
+
+		const itemArr: RSSItem[] = [];
+
+		for (let item of items) {
+			if (isItem(item)) {
+				itemArr.push({
+					title: item.title,
+					description: item.description,
+					link: item.link,
+					pubDate: item.pubDate
+				});
+			}
+		}
+		feed.channel.item = itemArr;
+	}
+	return feed;
 
 }
 
-function validateItem(item: any): RSSItem | null {
-	if (!item.title || typeof item.title !== 'string') {
-		return null;
+async function fetchData(url: string) {
+	const res = await fetch(url, {
+		method: "GET",
+		headers: {
+			"User-Agent": "gator",
+			accept: "application/rss+xml"
+		}
+	});
+	if (!res.ok) {
+		throw new Error(`failed to fetch feed: ${res.status} ${res.statusText}`);
 	}
-	if (!item.link || typeof item.link !== 'string') {
-		return null;
-	}
-	if (!item.description || typeof item.description !== 'string') {
-		return null;
-	}
-	if (!item.pubDate || typeof item.pubDate !== 'string') {
-		return null;
-	}
-	return {
-		title: item.title,
-		link: item.line,
-		description: item.description,
-		pubDate: item.pubdate
-	};
+	return res.text();
 }

@@ -30,6 +30,21 @@
   "dependencies": {
     "drizzle-orm": "^0.44.3",
     "fast-xml-parser": "^5.2.5",
+    "generate": "drizzle-kit generate",
+    "migrate": "drizzle-kit migrate"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "drizzle-kit": "^0.31.7",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.44.7",
+    "fast-xml-parser": "^5.3.2",
     "postgres": "^3.4.7"
   }
 }

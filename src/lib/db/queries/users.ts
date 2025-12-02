@@ -20,3 +20,8 @@ export async function getUsers() {
 	const usersData = await db.select().from(users);
 	return usersData;
 }
+
+export async function getUserById(id: string) {
+	const res = await db.select().from(users).where(eq(users.id, id));
+	return firstOrUndefined(res);
+}
